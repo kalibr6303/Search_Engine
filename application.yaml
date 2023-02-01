@@ -1,7 +1,7 @@
 spring:
   datasource:
     username: root
-    password: katiaNIK18
+    password: root
     url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
   jpa:
     properties:
@@ -16,7 +16,9 @@ spring:
 indexing-settings:
   sites:
 
-
-
-  - url: https://et-cetera.ru/mobile
-    name: Театр "ET Cetera
+  - url: http://www.playback.ru
+      name: Интернет магазин "PlayBack"
+    - url: https://et-cetera.ru/mobile
+      name: Театр "ET Cetera"
+    - url: https://nikoartgallery.com
+      name: Галерея NIko
