@@ -1,8 +1,11 @@
 package searchengine.model;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 
 @Getter
@@ -21,7 +24,7 @@ public class Site {
     private StatusType status;
 
     @Column(name = "status_time")
-    private LocalDateTime statusTime;
+    private Date statusTime;
 
     @Column(name = "last_error")
     private String lastError;

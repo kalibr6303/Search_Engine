@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import javax.persistence.Index;
 
@@ -40,8 +41,8 @@ public class Page {
     private Site site;
 
 
-    public Page() {
-    }
+   // public Page(String pageFormat, int status, String content, Site site) {
+  //  }
 
 
 
