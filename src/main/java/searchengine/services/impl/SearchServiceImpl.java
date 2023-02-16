@@ -3,21 +3,18 @@ package searchengine.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
-import searchengine.developer.Snippet;
 import searchengine.developer.SnippetParser;
 import searchengine.dto.SearchDto;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.model.Page;
 import searchengine.model.Site;
-import searchengine.morphology.LuceneMorphology;
 import searchengine.morphology.Morphology;
 import searchengine.repositories.IndexRepository;
 import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.SearchService;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -32,18 +29,9 @@ public class SearchServiceImpl implements SearchService {
     private final PageRepository pageRepository;
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
-    private Morphology morphology;
-    private SnippetParser snippetParser;
-    public final SitesList sitesList;
-
-    {
-        try {
-            snippetParser = new Snippet();
-            morphology = new LuceneMorphology();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    private final Morphology morphology;
+    private final SnippetParser snippetParser;
+    private final SitesList sitesList;
 
 
     public List<SearchDto> allSiteSearch(String text, int offset, int limit) {
