@@ -1,7 +1,6 @@
 package searchengine.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.developer.Snippet;
@@ -18,14 +17,13 @@ import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.SearchService;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 
@@ -53,17 +51,18 @@ public class SearchServiceImpl implements SearchService {
         List<searchengine.config.Site> urlList = sitesList.getSites();
         List<SearchDto> allSearchDto = new ArrayList<>();
         for (searchengine.config.Site s : urlList) {
-            List<Integer> lemmasOfBase = getRequestListSite(text, s.getUrl());
-            List<SearchDto> searchDtoOfSite = getRequestResponse(lemmasOfBase, text, offset, limit);
+            List<SearchDto> searchDtoOfSite = siteSearch(text, s.getUrl(), offset, limit);
             if (searchDtoOfSite != null) allSearchDto.addAll(searchDtoOfSite);
         }
+         Collections.sort(allSearchDto, (o1, o2) -> {
+             return o2.getRelevance().compareTo(o1.getRelevance());
+        });
         return allSearchDto;
     }
 
 
     public List<SearchDto> siteSearch(String word, String url, int offset, int limit) {
         List<Integer> lemmasOfBase = getRequestListSite(word, url);
-
         return getRequestResponse(lemmasOfBase, word, offset, limit);
     }
 
@@ -144,7 +143,6 @@ public class SearchServiceImpl implements SearchService {
     public HashMap<Integer, Float> getFilteredPage(List<Integer> lemmasInBase, String word) {
 
         List<Integer> pagesForOneLemma = getListLemmasRequest(lemmasInBase);
-        pagesForOneLemma.forEach(System.out::println);
         HashMap<String, Integer> store = morphology.getLemmaList(word);
 
         if (lemmasInBase == null || lemmasInBase.size() != store.size()) return null;
@@ -153,8 +151,8 @@ public class SearchServiceImpl implements SearchService {
         lemmasInBase.forEach(l -> {
             pagesForOneLemma.forEach(p -> {
                 if (pageRanks.containsKey(p) && isOnIndex(p, l) != 0)
-                    pageRanks.put(p, pageRanks.get(p) + isOnIndex(p, l));
-                if (!pageRanks.containsKey(p) && isOnIndex(p, l) != 0)
+                    pageRanks.put(p, pageRanks.get(p) + isOnIndex(p, l)); //рассчитываем абсолютную релевантность и
+                if (!pageRanks.containsKey(p) && isOnIndex(p, l) != 0)// сохраняем в значении l
                     pageRanks.put(p, isOnIndex(p, l));
                 if (pageRanks.containsKey(p) && isOnIndex(p, l) == 0) pageRanks.remove(p);
             });
