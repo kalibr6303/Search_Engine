@@ -1,23 +1,19 @@
 package searchengine.developer;
 
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import searchengine.morphology.LuceneMorphology;
 import searchengine.morphology.Morphology;
-import java.io.IOException;
+
 import java.util.*;
 
 @Component
+@RequiredArgsConstructor
 public class Snippet implements SnippetParser {
 
-    private Morphology morphology = new LuceneMorphology();
-
-
-    public Snippet() throws IOException {
-    }
+    private final Morphology morphology;
 
 
     public List<String> getTegFromContent(String content) {
