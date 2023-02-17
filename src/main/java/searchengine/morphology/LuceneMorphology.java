@@ -24,8 +24,7 @@ public class LuceneMorphology implements Morphology{
         }
     }
 
-    public LuceneMorphology() throws IOException {
-    }
+    
 
     public Boolean isContainsServicePartSpeech(String word) throws IOException {
         String word1 = word.trim();

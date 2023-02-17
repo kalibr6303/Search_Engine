@@ -22,6 +22,7 @@ public class IndexPage implements Runnable {
     private final String url;
     private final SitesList sitesList;
     private final String link;
+    private final Lemma lemma;
 
     @SneakyThrows
     @Override
@@ -32,7 +33,7 @@ public class IndexPage implements Runnable {
         if (page != null) pageRepository.delete(page);
         PageUrlFound pageUrlFound = new PageUrlFound();
         List<PageDto> pageDtoList = pageUrlFound.getOnePageUrlFound(link);
-        IndexSite indexSite = new IndexSite(siteRepository, pageRepository, url, sitesList);
+        IndexSite indexSite = new IndexSite(siteRepository, pageRepository, url, sitesList, lemma);
         indexSite.saveToBase(pageDtoList);
 
     }

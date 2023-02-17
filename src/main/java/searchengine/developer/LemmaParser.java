@@ -1,27 +1,21 @@
 package searchengine.developer;
 
 
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
 import searchengine.model.Page;
 import searchengine.model.Site;
-import searchengine.morphology.LuceneMorphology;
 import searchengine.morphology.Morphology;
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-
-public class LemmaParser {
-    private    Morphology morphology = new LuceneMorphology();
-    public Site site;
-    public searchengine.model.Page page;
-
-
-    public LemmaParser(Page page) throws IOException {
-        this.page = page;
-    }
-
+@Component
+@RequiredArgsConstructor
+public class LemmaParser implements Lemma {
+    private   final Morphology morphology;
 
 
     public synchronized static int addOfBaseLemma(Site site, String lemma, java.sql.Connection connection) throws SQLException {
@@ -52,7 +46,7 @@ public class LemmaParser {
 
     }
 
-    public void writeLemmaToBase(String content, Site site, java.sql.Connection connection) throws SQLException {
+    public void writeLemmaToBase(String content, Site site, Page page, java.sql.Connection connection) throws SQLException {
         
         AtomicReference<Integer> ranks = new AtomicReference<>(0);
         HashMap<String, Integer> storage = morphology.getLemmaList(content);
