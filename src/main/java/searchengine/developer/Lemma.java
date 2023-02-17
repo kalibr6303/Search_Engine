@@ -7,5 +7,5 @@ import java.sql.SQLException;
 
 public interface Lemma {
 
-        void writeLemmaToBase(String content, Site site, Page page, java.sql.Connection connection) throws SQLException;
+        void writeLemmaToBase(String content, Site site, Page page) throws SQLException;
 }

@@ -74,7 +74,6 @@ public class IndexSite implements Runnable {
     public void saveToBase(List<PageDto> pages) throws InterruptedException, SQLException, IOException {
         if (!Thread.interrupted()) {
             Site site = siteRepository.findByUrl(url);
-            ConnectionSql connectionSql = new ConnectionSql();
             for (PageDto s : pages) {
                 Page page = new Page();
                 String content = s.getContent();
@@ -85,10 +84,10 @@ public class IndexSite implements Runnable {
                 page.setSite(site);
                 pageRepository.save(page);
                 if (s.getStatus() == 200) {
-                    lemma.writeLemmaToBase(content, site, page,connectionSql.getConnection());
+                    lemma.writeLemmaToBase(content, site, page);
                 }
             }
-            connectionSql.getConnection().close();
+            ConnectionSql.getConnection().close();
 
         } else {
             throw new InterruptedException();
