@@ -23,6 +23,7 @@ public class IndexSite implements Runnable {
     private final PageRepository pageRepository;
     private final String url;
     private final  SitesList sitesList;
+    private final Lemma lemma;
 
     @SneakyThrows
     @Override
@@ -73,7 +74,6 @@ public class IndexSite implements Runnable {
     public void saveToBase(List<PageDto> pages) throws InterruptedException, SQLException, IOException {
         if (!Thread.interrupted()) {
             Site site = siteRepository.findByUrl(url);
-            ConnectionSql connectionSql = new ConnectionSql();
             for (PageDto s : pages) {
                 Page page = new Page();
                 String content = s.getContent();
@@ -84,11 +84,11 @@ public class IndexSite implements Runnable {
                 page.setSite(site);
                 pageRepository.save(page);
                 if (s.getStatus() == 200) {
-                    LemmaParser lemmaParser = new LemmaParser(page);
-                    lemmaParser.writeLemmaToBase(content, site, connectionSql.getConnection());
+                    lemma.writeLemmaToBase(content, site, page);
+
                 }
             }
-            connectionSql.getConnection().close();
+            ConnectionSql.getConnection().close();
 
         } else {
             throw new InterruptedException();

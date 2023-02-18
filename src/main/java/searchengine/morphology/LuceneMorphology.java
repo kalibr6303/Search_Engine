@@ -2,6 +2,7 @@ package searchengine.morphology;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 @Slf4j
+@Component
 public class LuceneMorphology implements Morphology{
 
 
@@ -22,7 +24,7 @@ public class LuceneMorphology implements Morphology{
         }
     }
 
-    public LuceneMorphology() throws IOException {
+    public LuceneMorphology()  {
     }
 
     public Boolean isContainsServicePartSpeech(String word) throws IOException {

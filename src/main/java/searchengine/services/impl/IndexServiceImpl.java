@@ -3,11 +3,13 @@ package searchengine.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
 import searchengine.developer.IndexPage;
 import searchengine.developer.IndexSite;
+import searchengine.developer.Lemma;
 import searchengine.model.StatusType;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
@@ -18,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
+@Component
 @RequiredArgsConstructor
 @Slf4j
 
@@ -27,6 +30,7 @@ public class IndexServiceImpl implements IndexService {
     private final SiteRepository siteRepository;
     private final PageRepository pageRepository;
     private ExecutorService executorService;
+    private final Lemma lemma;
 
 
     public boolean indexAll() {
@@ -42,7 +46,8 @@ public class IndexServiceImpl implements IndexService {
                 executorService.submit(new IndexSite(siteRepository,
                         pageRepository,
                         url,
-                        sitesList));
+                        sitesList, lemma
+                        ));
             }
             executorService.shutdown();
             return true;
@@ -57,7 +62,7 @@ public class IndexServiceImpl implements IndexService {
         executorService.submit(new IndexPage(siteRepository,
                 pageRepository,
                 url,
-                sitesList, link));
+                sitesList, link,lemma));
         executorService.shutdown();
         return true;
     }
