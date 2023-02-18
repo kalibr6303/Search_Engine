@@ -6,10 +6,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 import searchengine.morphology.Morphology;
-<<<<<<< HEAD
-=======
-
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
 import java.util.*;
 
 @Component

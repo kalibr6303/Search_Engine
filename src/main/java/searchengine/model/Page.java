@@ -16,8 +16,6 @@ import javax.persistence.Index;
         @Index(name = "idx_page_path", columnList = "path")
 })
 
-
-
 public class Page {
 
     @Id
@@ -39,11 +37,5 @@ public class Page {
     @OnDelete(action = OnDeleteAction.CASCADE)
 
     private Site site;
-
-
-   // public Page(String pageFormat, int status, String content, Site site) {
-  //  }
-
-
 
 }

@@ -14,7 +14,6 @@ import searchengine.model.StatusType;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.IndexService;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,12 +45,8 @@ public class IndexServiceImpl implements IndexService {
                 executorService.submit(new IndexSite(siteRepository,
                         pageRepository,
                         url,
-<<<<<<< HEAD
                         sitesList, lemma
                         ));
-=======
-                        sitesList, lemma));
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
             }
             executorService.shutdown();
             return true;
@@ -66,11 +61,7 @@ public class IndexServiceImpl implements IndexService {
         executorService.submit(new IndexPage(siteRepository,
                 pageRepository,
                 url,
-<<<<<<< HEAD
                 sitesList, link,lemma));
-=======
-                sitesList, link, lemma));
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
         executorService.shutdown();
         return true;
     }

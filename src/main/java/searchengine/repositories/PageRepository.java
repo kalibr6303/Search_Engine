@@ -9,5 +9,5 @@ import searchengine.model.Page;
 @Repository
 public interface PageRepository extends JpaRepository<Page, Integer> {
     Page findByPath(String path);
-    // findById(Integer id);
+
 }

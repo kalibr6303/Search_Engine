@@ -1,30 +1,44 @@
 package searchengine.developer;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 
-@RequiredArgsConstructor
 @Component
 public class ConnectionSql {
 
-<<<<<<< HEAD
-    public final static String url = "jdbc:mysql://localhost:3306/search_engine?eseSSL=false&serverTimezone=UTC";
-    public  final static String user = "root";
-    public final static String pass = "katiaNIK18";
-=======
-    public static String url = "jdbc:mysql://localhost:3306/searh?eseSSL=false&serverTimezone=UTC";
-    public   static String user = "root";
-    public static String pass = "katiaNIK22";
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
+    private static final String fileName = "application.yaml";
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, pass);
+    public static Connection getConnection() throws SQLException, IOException {
+        List<String> configConnections = readUsingFileReader(fileName);
+        return DriverManager.getConnection(configConnections.get(0),
+                configConnections.get(1),
+                configConnections.get(2));
     }
 
+    public static List<String> readUsingFileReader(String fileName)
+            throws IOException {
+        File file = new File(fileName);
+        FileReader fr = new FileReader(file);
+        BufferedReader br = new BufferedReader(fr);
+        String line;
+        List<String> config = new ArrayList<>();
 
+
+        while ((line = br.readLine()) != null) {
+            if (line.matches("(\\s+username:\\s[^а-я]+)|" +
+                    "(\\s+password:\\s[^а-я]+)|" +
+                    "(\\s+url:\\s[^а-я]+)")) {
+                config.add(line);
+            }
+        }
+        br.close();
+        fr.close();
+        return  config;
+    }
 }

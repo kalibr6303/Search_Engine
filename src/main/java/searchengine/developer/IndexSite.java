@@ -85,10 +85,7 @@ public class IndexSite implements Runnable {
                 pageRepository.save(page);
                 if (s.getStatus() == 200) {
                     lemma.writeLemmaToBase(content, site, page);
-<<<<<<< HEAD
 
-=======
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
                 }
             }
             ConnectionSql.getConnection().close();

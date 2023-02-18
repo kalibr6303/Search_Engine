@@ -2,19 +2,15 @@ package searchengine.developer;
 
 
 import lombok.RequiredArgsConstructor;
-<<<<<<< HEAD
-=======
-
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
 import org.springframework.stereotype.Component;
 import searchengine.model.Page;
 import searchengine.model.Site;
 import searchengine.morphology.Morphology;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-<<<<<<< HEAD
 @Component
 @RequiredArgsConstructor
 public class LemmaParser implements Lemma{
@@ -23,19 +19,7 @@ public class LemmaParser implements Lemma{
 
 
 
-    public  synchronized  int addOfBaseLemma(Site site, String lemma) throws SQLException {
-=======
-
-@Component
-@RequiredArgsConstructor
-public class LemmaParser implements Lemma {
-    private   final Morphology morphology;
-    private  final ConnectionSql connectionSql = new ConnectionSql();
-
-
-
-    public synchronized  int addOfBaseLemma(Site site, String lemma) throws SQLException {
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
+    public  synchronized  int addOfBaseLemma(Site site, String lemma) throws SQLException, IOException {
 
         String siteId = String.valueOf(site.getId());
         String sql = "INSERT INTO lemma(lemma, site_id, `frequency`) VALUE('" + lemma + "', '" + siteId + "', 1) " +
@@ -55,11 +39,7 @@ public class LemmaParser implements Lemma {
     }
 
 
-<<<<<<< HEAD
-    public void executeMultiInsert(String count, StringBuilder stringBuilder) throws SQLException {
-=======
-    public  void executeMultiInsert(String count, StringBuilder stringBuilder) throws SQLException {
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
+    public void executeMultiInsert(String count, StringBuilder stringBuilder) throws SQLException, IOException {
         String sql = "INSERT INTO indexed(lemma_id, page_id, `ranks`) " +
                 "VALUES" + stringBuilder.toString() +
                 "ON DUPLICATE KEY UPDATE `ranks`=`ranks`+ '" + count + "'";
@@ -67,11 +47,7 @@ public class LemmaParser implements Lemma {
 
     }
 
-<<<<<<< HEAD
-    public   void writeLemmaToBase(String content, Site site, Page page) throws SQLException {
-=======
-    public void writeLemmaToBase(String content, Site site, Page page) throws SQLException {
->>>>>>> 025241e972bcbb4cf9ecfb32bdd6ce75d407bb47
+    public   void writeLemmaToBase(String content, Site site, Page page) throws SQLException, IOException {
 
         AtomicReference<Integer> ranks = new AtomicReference<>(0);
         HashMap<String, Integer> storage = morphology.getLemmaList(content);
@@ -84,7 +60,7 @@ public class LemmaParser implements Lemma {
                 try {
 
                     lemmaId = addOfBaseLemma(site, s);
-                } catch (SQLException e) {
+                } catch (SQLException | IOException e) {
                     e.printStackTrace();
                 }
                 ranks.set(storage.get(s));
