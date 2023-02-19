@@ -34,7 +34,7 @@ public class SearchServiceImpl implements SearchService {
     private final SitesList sitesList;
 
 
-    public List<SearchDto> allSiteSearch(String text, int offset, int limit)  {
+    public List<SearchDto> allSiteSearch(String text, int offset, int limit) {
 
         List<searchengine.config.Site> urlList = sitesList.getSites();
         List<SearchDto> allSearchDto = new ArrayList<>();

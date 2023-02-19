@@ -10,13 +10,14 @@ import searchengine.model.Site;
 import searchengine.model.StatusType;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+import searchengine.sql.ConnectionSql;
+import searchengine.sql.Lemma;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 @RequiredArgsConstructor
-
 public class IndexSite implements Runnable {
 
     private final SiteRepository siteRepository;
@@ -51,7 +52,6 @@ public class IndexSite implements Runnable {
         siteRepository.save(site);
 
     } catch (Exception e) {
-        e.printStackTrace();
         site.setLastError("Индексация остановлена");
         site.setStatus(StatusType.FAILED);
         site.setStatusTime(new Date());
@@ -68,7 +68,8 @@ public class IndexSite implements Runnable {
             ForkJoinPool forkJoinPool = new ForkJoinPool();
             List<PageDto> pages = forkJoinPool.invoke(new PageUrlFound(urlFormat, pageDtoVector, urlList));
             return pages;
-        } else throw new InterruptedException();
+        }
+        else throw new InterruptedException();
     }
 
     public void saveToBase(List<PageDto> pages) throws InterruptedException, SQLException, IOException {

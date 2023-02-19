@@ -8,6 +8,7 @@ import searchengine.dto.PageDto;
 import searchengine.model.Page;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+import searchengine.sql.Lemma;
 
 import java.util.List;
 
