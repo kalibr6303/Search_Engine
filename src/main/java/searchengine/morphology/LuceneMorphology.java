@@ -29,7 +29,7 @@ public class LuceneMorphology implements Morphology{
 
     public Boolean isContainsServicePartSpeech(String word) throws IOException {
         String word1 = word.trim();
-        if (!word1.matches("[а-яА-Я]+")) return true;
+        if (!word1.matches("[а-яА-Я]+") || word1.matches("[а-яА-Я]")) return true;
         List<String> wordBaseForms = luceneMorphology.getMorphInfo(word1);
         for (String l : wordBaseForms) {
             if (l.matches("([\\W\\w]+ПРЕДЛ)|([\\W\\w]+МЕЖД)|" +

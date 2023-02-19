@@ -9,7 +9,7 @@ import searchengine.morphology.Morphology;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+
 
 @Component
 @RequiredArgsConstructor
@@ -42,37 +42,32 @@ public class LemmaWriter implements Lemma{
     }
 
 
-    public void executeMultiInsert(String count, StringBuilder stringBuilder) throws SQLException {
+    public void executeMultiInsert(StringBuilder stringBuilder) throws SQLException {
         String sql = "INSERT INTO indexed(lemma_id, page_id, `ranks`) " +
-                "VALUES" + stringBuilder.toString() +
-                "ON DUPLICATE KEY UPDATE `ranks`=`ranks`+ '" + count + "'";
+                "VALUES" + stringBuilder.toString() + "";
         connectionSql.getConnection().createStatement().execute(sql);
 
     }
 
+
+
     public   void writeLemmaToBase(String content, Site site, Page page) throws SQLException, InterruptedException {
         if (!Thread.interrupted()) {
-
-
-            AtomicReference<Integer> ranks = new AtomicReference<>(0);
             HashMap<String, Integer> storage = morphology.getLemmaList(content);
             StringBuilder stringBuilderIndex = new StringBuilder();
-            Set<String> listLemmas = storage.keySet();
-
-            if (listLemmas.size() != 0) {
-                listLemmas.forEach(s -> {
-                    int lemmaId = 0;
+            if (storage.size() != 0) {
+                storage.entrySet().forEach(l ->{
                     try {
+                        int lemmaId = addOfBaseLemma(site, l.getKey());
+                        boolean isStart = stringBuilderIndex.length() == 0;
+                        stringBuilderIndex.append((isStart ? "" : ",") +
+                                "('" + lemmaId + "', '" + page.getId() + "', '" + l.getValue() + "')");
 
-                        lemmaId = addOfBaseLemma(site, s);
                     } catch (SQLException | IOException | InterruptedException e) {
                         e.printStackTrace();
                     }
-                    ranks.set(storage.get(s));
-                    boolean isStart = stringBuilderIndex.length() == 0;
-                    stringBuilderIndex.append((isStart ? "" : ",") + "('" + lemmaId + "', '" + page.getId() + "', '" + ranks + "')");
                 });
-                executeMultiInsert(String.valueOf(ranks), stringBuilderIndex);
+                executeMultiInsert(stringBuilderIndex);
             }
         } else {
             throw new InterruptedException();
