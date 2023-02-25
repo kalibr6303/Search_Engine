@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
 import searchengine.developer.SnippetParser;
+import searchengine.dto.Response.SearchResponse;
 import searchengine.dto.SearchDto;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
@@ -34,24 +35,43 @@ public class SearchServiceImpl implements SearchService {
     private final SitesList sitesList;
 
 
-    public List<SearchDto> allSiteSearch(String text, int offset, int limit) {
-
+    public SearchResponse allSiteSearch(String word, int offset, int limit) {
+        SearchResponse searchResponse = new SearchResponse();
+        if (word.isEmpty() || !word.matches("[а-яА-Я\\s]+")) {
+            searchResponse.setResult(false);
+            searchResponse.setError("Задан пустой поисковый запрос");
+            return searchResponse;
+        }
         List<searchengine.config.Site> urlList = sitesList.getSites();
         List<SearchDto> allSearchDto = new ArrayList<>();
         for (searchengine.config.Site s : urlList) {
-            List<SearchDto> searchDtoOfSite = siteSearch(text, s.getUrl(), offset, limit);
+            List<Integer> lemmasOfBase = getRequestListSite(word, s.getUrl());
+            List<SearchDto> searchDtoOfSite = getRequestResponse(lemmasOfBase, word, offset, limit);
             if (searchDtoOfSite != null) allSearchDto.addAll(searchDtoOfSite);
         }
          Collections.sort(allSearchDto, (o1, o2) -> {
              return o2.getRelevance().compareTo(o1.getRelevance());
         });
-        return allSearchDto;
+        searchResponse.setResult(true);
+        searchResponse.setData(allSearchDto);
+        searchResponse.setCount(allSearchDto.size());
+        return searchResponse;
     }
 
 
-    public List<SearchDto> siteSearch(String word, String url, int offset, int limit)  {
+    public SearchResponse siteSearch(String word, String url, int offset, int limit)  {
+        SearchResponse searchResponse = new SearchResponse();
+        if (word.isEmpty() || !word.matches("[а-яА-Я\\s]+")) {
+            searchResponse.setResult(false);
+            searchResponse.setError("Задан пустой поисковый запрос");
+            return searchResponse;
+        }
         List<Integer> lemmasOfBase = getRequestListSite(word, url);
-        return getRequestResponse(lemmasOfBase, word, offset, limit);
+        List<SearchDto> searchDtoOfSite = getRequestResponse(lemmasOfBase, word, offset, limit);
+        searchResponse.setResult(true);
+        searchResponse.setData(searchDtoOfSite);
+        //searchResponse.setCount(searchDtoOfSite.size());
+        return searchResponse;
     }
 
     // TODO: 11.02.2023 Получаем  сортированный список лемм по значению frequency, имеющихся в базе

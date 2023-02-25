@@ -4,7 +4,7 @@ import lombok.Data;
 
 
     @Data
-    public class ResponseResult {
+    public class IndexingResponse {
         private Boolean result;
         private String error;
     }

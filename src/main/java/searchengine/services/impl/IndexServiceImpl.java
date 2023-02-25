@@ -9,11 +9,15 @@ import searchengine.config.Site;
 import searchengine.config.SitesList;
 import searchengine.developer.IndexPage;
 import searchengine.developer.IndexSite;
+import searchengine.developer.Lemma;
+import searchengine.dto.Response.IndexingResponse;
 import searchengine.model.StatusType;
+import searchengine.repositories.IndexRepository;
+import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.IndexService;
-import searchengine.sql.Lemma;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,13 +33,20 @@ public class IndexServiceImpl implements IndexService {
     private final SiteRepository siteRepository;
     private final PageRepository pageRepository;
     private ExecutorService executorService;
+    //private final Lemma lemma;
     private final Lemma lemma;
+    private final LemmaRepository lemmaRepository;
+    private final IndexRepository indexRepository;
 
 
-    public boolean indexAll() {
+
+    public IndexingResponse indexAll() {
+        IndexingResponse indexingResponse = new IndexingResponse();
 
         if (isIndexingActive()) {
-            return false;
+            indexingResponse.setResult(false);
+            indexingResponse.setError("Индексация уже запущена");
+            return indexingResponse;
         } else {
             List<Site> urlList = sitesList.getSites();
 
@@ -45,35 +56,47 @@ public class IndexServiceImpl implements IndexService {
                 executorService.submit(new IndexSite(siteRepository,
                         pageRepository,
                         url,
-                        sitesList, lemma
+                        sitesList, lemma, lemmaRepository, indexRepository
                         ));
             }
             executorService.shutdown();
-            return true;
+            indexingResponse.setResult(true);
+            return indexingResponse;
         }
     }
 
 
-    public boolean indexPage(String link) {
+    public IndexingResponse indexPage(String link) {
+        IndexingResponse indexingResponse = new IndexingResponse();
         String url = containSiteOfBaseByLink(link);
-        if (url == null) return false;
+        if (url == null) {
+            indexingResponse.setResult(false);
+            indexingResponse.setError("Данная страница находится за пределами сайтов, указанных " +
+                    "в конфигурационном файле");
+            return indexingResponse;
+        }
         executorService = Executors.newCachedThreadPool();
         executorService.submit(new IndexPage(siteRepository,
                 pageRepository,
                 url,
-                sitesList, link, lemma));
+                sitesList, link, lemma, lemmaRepository, indexRepository));
         executorService.shutdown();
-        return true;
+        indexingResponse.setResult(true);
+        return indexingResponse;
     }
 
 
     @Override
-    public boolean stopIndexing() {
+    public IndexingResponse stopIndexing() {
+        IndexingResponse indexingResponse = new IndexingResponse();
         if (isIndexingActive()) {
             executorService.shutdownNow();
-            return true;
+            indexingResponse.setResult(true);
+            return indexingResponse;
         } else {
-            return false;
+            indexingResponse.setResult(false);
+            indexingResponse.setError("Индексация не запущена");
+            return indexingResponse;
         }
     }
 

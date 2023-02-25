@@ -1,7 +1,9 @@
 package searchengine.services;
 
+import searchengine.dto.Response.IndexingResponse;
+
 public interface IndexService {
-    boolean indexPage(String url);
-    boolean indexAll();
-    boolean stopIndexing();
+    IndexingResponse indexPage(String url);
+    IndexingResponse indexAll();
+    IndexingResponse stopIndexing();
 }
