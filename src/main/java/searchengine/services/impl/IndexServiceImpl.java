@@ -9,15 +9,12 @@ import searchengine.config.Site;
 import searchengine.config.SitesList;
 import searchengine.developer.IndexPage;
 import searchengine.developer.IndexSite;
-import searchengine.developer.Lemma;
+import searchengine.sql.Lemma;
 import searchengine.dto.Response.IndexingResponse;
 import searchengine.model.StatusType;
-import searchengine.repositories.IndexRepository;
-import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.IndexService;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,10 +30,8 @@ public class IndexServiceImpl implements IndexService {
     private final SiteRepository siteRepository;
     private final PageRepository pageRepository;
     private ExecutorService executorService;
-    //private final Lemma lemma;
     private final Lemma lemma;
-    private final LemmaRepository lemmaRepository;
-    private final IndexRepository indexRepository;
+
 
 
 
@@ -56,8 +51,8 @@ public class IndexServiceImpl implements IndexService {
                 executorService.submit(new IndexSite(siteRepository,
                         pageRepository,
                         url,
-                        sitesList, lemma, lemmaRepository, indexRepository
-                        ));
+                        sitesList, lemma
+                ));
             }
             executorService.shutdown();
             indexingResponse.setResult(true);
@@ -79,7 +74,7 @@ public class IndexServiceImpl implements IndexService {
         executorService.submit(new IndexPage(siteRepository,
                 pageRepository,
                 url,
-                sitesList, link, lemma, lemmaRepository, indexRepository));
+                sitesList, link, lemma));
         executorService.shutdown();
         indexingResponse.setResult(true);
         return indexingResponse;

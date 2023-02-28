@@ -49,8 +49,8 @@ public class SearchServiceImpl implements SearchService {
             List<SearchDto> searchDtoOfSite = getRequestResponse(lemmasOfBase, word, offset, limit);
             if (searchDtoOfSite != null) allSearchDto.addAll(searchDtoOfSite);
         }
-         Collections.sort(allSearchDto, (o1, o2) -> {
-             return o2.getRelevance().compareTo(o1.getRelevance());
+        Collections.sort(allSearchDto, (o1, o2) -> {
+            return o2.getRelevance().compareTo(o1.getRelevance());
         });
         searchResponse.setResult(true);
         searchResponse.setData(allSearchDto);
@@ -70,7 +70,8 @@ public class SearchServiceImpl implements SearchService {
         List<SearchDto> searchDtoOfSite = getRequestResponse(lemmasOfBase, word, offset, limit);
         searchResponse.setResult(true);
         searchResponse.setData(searchDtoOfSite);
-        //searchResponse.setCount(searchDtoOfSite.size());
+        if (searchDtoOfSite != null) searchResponse.setCount(searchDtoOfSite.size());
+        else searchResponse.setCount(0);
         return searchResponse;
     }
 
@@ -84,14 +85,13 @@ public class SearchServiceImpl implements SearchService {
         List<Integer> idLemmasSort = new ArrayList<>();
         if (url != null) {
             Site site = siteRepository.findByUrl(url);
-            List<Lemma> lemmaOfBase = lemmaRepository.findAll();
-            request.forEach(s -> {
-                for (Lemma l : lemmaOfBase) {
-                    if (l.getLemma().equals(s) && l.getSite().equals(site)) {
-                        lemmaFrequency.put(l.getId(), l.getFrequency());
-                    }
+            request.forEach(l -> {
+                Lemma lemma = lemmaRepository.findLemmaByLemmaAndSite(l, site);
+                if (lemma != null){
+                    lemmaFrequency.put(lemma.getId(), lemma.getFrequency());
                 }
             });
+
 
             if (lemmaFrequency != null) {  //сортируем по значению (frequency)
                 lemmaFrequency.entrySet()
@@ -139,10 +139,10 @@ public class SearchServiceImpl implements SearchService {
         List<Integer> idOneOfPage = new ArrayList<>();
         int lemmaOne = 0;
         if (lemmas.size() != 0) lemmaOne = lemmas.get(0);
-        List<Index> indexList = indexRepository.findAll();
-        for (Index i : indexList) {
-            if (i.getLemma().getId() == lemmaOne) idOneOfPage.add(i.getPage().getId());
-        }
+        Lemma lemma = lemmaRepository.getReferenceById(lemmaOne);
+        List<Index> index = indexRepository.getIndexByLemma(lemma);
+        index.forEach(i -> idOneOfPage.add(i.getPage().getId()));
+
         return idOneOfPage;
     }
 
@@ -178,12 +178,10 @@ public class SearchServiceImpl implements SearchService {
 
     public float isOnIndex(int page, int lemma) {
         Lemma word = lemmaRepository.findLemmaById(lemma);
-        Optional<Page> page1 = pageRepository.findById(page);
-        List<Index> listOdIndex = indexRepository.findAll();
-        for (Index i : listOdIndex) {
-            if (i.getLemma().equals(word) && i.getPage().equals(page1.get())) return i.getRanks();
-        }
-        return 0;
+        Page page1 = pageRepository.findById(page);
+        Index index = indexRepository.getIndexByLemmaAndPage(word, page1);
+        if (index == null) return 0;
+        else return index.getRanks();
     }
 
 

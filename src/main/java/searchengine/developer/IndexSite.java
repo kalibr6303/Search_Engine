@@ -5,14 +5,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import searchengine.config.SitesList;
 import searchengine.dto.PageDto;
-import searchengine.model.*;
-import searchengine.repositories.IndexRepository;
-import searchengine.repositories.LemmaRepository;
+import searchengine.model.Page;
+import searchengine.model.Site;
+import searchengine.model.StatusType;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
+import searchengine.sql.Lemma;
+
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
-
 
 @RequiredArgsConstructor
 public class IndexSite implements Runnable {
@@ -22,8 +25,6 @@ public class IndexSite implements Runnable {
     private final String url;
     private final SitesList sitesList;
     private final Lemma lemma;
-    private final LemmaRepository lemmaRepository;
-    private final IndexRepository indexRepository;
 
 
     @SneakyThrows
@@ -72,80 +73,28 @@ public class IndexSite implements Runnable {
         } else throw new InterruptedException();
     }
 
-
-
-    private void saveToBase(List<PageDto> pages) throws InterruptedException {
+    public void saveToBase(List<PageDto> pages) throws InterruptedException, SQLException, IOException {
         if (!Thread.interrupted()) {
             Site site = siteRepository.findByUrl(url);
-            HashMap<String, Integer> lemmasOfWriteForBase = new HashMap<>();
-            HashMap<String, Integer> lemmasOfSite = lemma.getLemmasOfSite(pages);
-            for (PageDto s : pages) {
-                Page page = writePageInBase(s, site);
-                if (s.getStatus() == 200) {
-                    writeLemmaForPageInBase(lemmasOfSite, s, site, lemmasOfWriteForBase);
-                    writeIndexForPageInBase(s, page, lemmasOfWriteForBase);
-                } else site.setLastError("Страница недоступна");
-                siteRepository.save(site);
 
+
+            for (PageDto s : pages) {
+                Page page = new Page();
+                String content = s.getContent();
+                page.setContent(content);
+                String path = s.getUrl().replaceAll(url, "");
+                page.setPath(path);
+                page.setCode(s.getStatus());
+                page.setSite(site);
+                pageRepository.save(page);
+                if (s.getStatus() == 200) {
+                    lemma.writeLemmaToBase(content, site, page);
+
+
+                }
             }
 
-        } else {
-            throw new InterruptedException();
-        }
-    }
 
-    public Page writePageInBase(PageDto pageDto, Site site) throws InterruptedException {
-        if (!Thread.interrupted()) {
-            Page page = new Page();
-            String content = pageDto.getContent();
-            page.setContent(content);
-            String path = pageDto.getUrl().replaceAll(url, "");
-            page.setPath(path);
-            page.setCode(pageDto.getStatus());
-            page.setSite(site);
-            pageRepository.save(page);
-            return page;
-        } else {
-            throw new InterruptedException();
-        }
-    }
-
-
-    private void writeLemmaForPageInBase(HashMap<String, Integer> lemmasOfSite,
-                                         PageDto pageDto, Site site, HashMap<String,
-            Integer> lemmasOfWriteForBase) throws InterruptedException {
-        if (!Thread.interrupted()) {
-            HashMap<String, Integer> lemmasOfPageForWrite = lemma.getLemmaOfPageForWrite(lemmasOfSite, pageDto);
-            lemmasOfPageForWrite.entrySet().forEach(l -> {
-                searchengine.model.Lemma lemma = new searchengine.model.Lemma();
-                if (!lemmasOfWriteForBase.containsKey(l.getKey())) {
-                    lemma.setLemma(l.getKey());
-                    lemma.setFrequency(l.getValue());
-                    lemma.setSite(site);
-                    lemmaRepository.save(lemma);
-                    lemmasOfWriteForBase.put(l.getKey(), lemma.getId());
-
-                }
-            });
-        } else {
-            throw new InterruptedException();
-        }
-    }
-
-
-    public void writeIndexForPageInBase(PageDto pageDto, Page page,
-                                        HashMap<String, Integer> lemmasOfWriteForBase) throws InterruptedException {
-        HashMap<String, Integer> lemmasInIndex = lemma.getLemmasInIndex(pageDto);
-        if (!Thread.interrupted()) {
-            lemmasInIndex.entrySet().forEach(i -> {
-                Index index = new Index();
-                if (lemmasOfWriteForBase.containsKey(i.getKey())) {
-                    index.setPage(page);
-                    index.setLemma(lemmaRepository.findLemmaById(lemmasOfWriteForBase.get(i.getKey())));
-                    index.setRanks(i.getValue());
-                    indexRepository.save(index);
-                }
-            });
         } else {
             throw new InterruptedException();
         }

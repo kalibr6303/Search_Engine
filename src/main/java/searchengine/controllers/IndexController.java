@@ -10,30 +10,30 @@ import searchengine.dto.Response.IndexingResponse;
 import searchengine.services.IndexService;
 
 
-    @RestController
-    @RequiredArgsConstructor
-    @RequestMapping("/api")
-    public class IndexController {
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api")
+public class IndexController {
 
-        private final IndexService indexService;
-
-
-
-        @GetMapping("/startIndexing")
-        public ResponseEntity<IndexingResponse> startIndexingAll() {
-            return  ResponseEntity.ok(indexService.indexAll());
-        }
+    private final IndexService indexService;
 
 
-        @GetMapping("/stopIndexing")
-        public ResponseEntity<IndexingResponse> stopIndexing() {
-            return  ResponseEntity.ok(indexService.stopIndexing());
-        }
+
+    @GetMapping("/startIndexing")
+    public ResponseEntity<IndexingResponse> startIndexingAll() {
+        return  ResponseEntity.ok(indexService.indexAll());
+    }
 
 
-        @PostMapping("/indexPage")
-        public ResponseEntity<IndexingResponse>  indexLink(String url) {
-            return  ResponseEntity.ok(indexService.indexPage(url));
-        }
+    @GetMapping("/stopIndexing")
+    public ResponseEntity<IndexingResponse> stopIndexing() {
+        return  ResponseEntity.ok(indexService.stopIndexing());
+    }
+
+
+    @PostMapping("/indexPage")
+    public ResponseEntity<IndexingResponse>  indexLink(String url) {
+        return  ResponseEntity.ok(indexService.indexPage(url));
+    }
 
 }

@@ -1,9 +1,7 @@
 package searchengine.dto.Response;
 
 import lombok.Data;
-import lombok.Value;
 import searchengine.dto.SearchDto;
-
 import java.util.List;
 
 @Data

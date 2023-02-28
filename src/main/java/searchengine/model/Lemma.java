@@ -12,9 +12,8 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name = "lemma", uniqueConstraints = {
-@UniqueConstraint(name = "uc_index_lemma", columnNames = {"lemma", "site_id"})
+        @UniqueConstraint(name = "uc_index_lemma", columnNames = {"lemma", "site_id"})
 })
-
 
 public class Lemma {
 
@@ -24,8 +23,8 @@ public class Lemma {
 
     String lemma;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "site_id", nullable = false)
+    @ManyToOne( fetch = FetchType.EAGER, optional = false)
+    @JoinColumn( name = "site_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Site site;
 
