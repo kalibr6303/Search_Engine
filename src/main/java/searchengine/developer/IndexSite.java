@@ -1,6 +1,5 @@
 package searchengine.developer;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import searchengine.config.SitesList;
@@ -11,7 +10,6 @@ import searchengine.model.StatusType;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.sql.Lemma;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -47,7 +45,8 @@ public class IndexSite implements Runnable {
         siteRepository.save(site);
         try {
             List<PageDto> pageDtoList = getPageDtoList();
-            saveToBase(pageDtoList);
+            saveToBase(pageDtoList, site);
+            System.out.println(site.getLastError());
             site.setStatus(StatusType.INDEXED);
             site.setStatusTime(new Date());
             siteRepository.save(site);
@@ -73,27 +72,33 @@ public class IndexSite implements Runnable {
         } else throw new InterruptedException();
     }
 
-    public void saveToBase(List<PageDto> pages) throws InterruptedException, SQLException, IOException {
+    protected void saveToBase(List<PageDto> pages, Site site) throws InterruptedException, SQLException, IOException {
         if (!Thread.interrupted()) {
-            Site site = siteRepository.findByUrl(url);
-
-
-            for (PageDto s : pages) {
-                Page page = new Page();
-                String content = s.getContent();
-                page.setContent(content);
-                String path = s.getUrl().replaceAll(url, "");
-                page.setPath(path);
-                page.setCode(s.getStatus());
-                page.setSite(site);
-                pageRepository.save(page);
-                if (s.getStatus() == 200) {
-                    lemma.writeLemmaToBase(content, site, page);
-
-
+            if (pages == null) {
+                site.setLastError("Главная страница недоступна");
+                site.setStatus(StatusType.FAILED);
+                site.setStatusTime(new Date());
+                siteRepository.save(site);
+            }
+            else {
+                for (PageDto s : pages) {
+                    Page page = new Page();
+                    String content = s.getContent();
+                    page.setContent(content);
+                    String path = s.getUrl().replaceAll(url, "");
+                    page.setPath(path);
+                    page.setCode(s.getStatus());
+                    page.setSite(site);
+                    pageRepository.save(page);
+                    if (s.getStatus() == 200) {
+                        lemma.writeLemmaToBase(content, site, page);
+                    } else {
+                        site.setLastError("Страница " + url + path + " недоступна");
+                        site.setStatusTime(new Date());
+                        siteRepository.save(site);
+                    }
                 }
             }
-
 
         } else {
             throw new InterruptedException();

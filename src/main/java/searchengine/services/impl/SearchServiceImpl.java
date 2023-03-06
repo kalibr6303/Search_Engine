@@ -3,7 +3,7 @@ package searchengine.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.config.SitesList;
-import searchengine.developer.SnippetParser;
+import searchengine.developer.Snippet;
 import searchengine.dto.Response.SearchResponse;
 import searchengine.dto.SearchDto;
 import searchengine.model.Index;
@@ -31,7 +31,7 @@ public class SearchServiceImpl implements SearchService {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     private final Morphology morphology;
-    private final SnippetParser snippetParser;
+    private final Snippet snippet;
     private final SitesList sitesList;
 
 
@@ -76,7 +76,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     // TODO: 11.02.2023 Получаем  сортированный список лемм по значению frequency, имеющихся в базе
-    public List<Integer> getRequestListSite(String query, String url) {
+    private List<Integer> getRequestListSite(String query, String url) {
         HashMap<String, Integer> store = morphology.getLemmaList(query);
 
         List<String> request = new ArrayList<>();
@@ -105,7 +105,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
 
-    public List<SearchDto> getRequestResponse(List<Integer> lemmasOfBase, String word, int offset, int limit) {
+    private List<SearchDto> getRequestResponse(List<Integer> lemmasOfBase, String word, int offset, int limit) {
         HashMap<Integer, Float> listLemmasAccordingToRequest = getFilteredPage(lemmasOfBase, word);
         if (listLemmasAccordingToRequest == null) return null;
         List<SearchDto> listOfSearchDto = new ArrayList<>();
@@ -120,8 +120,8 @@ public class SearchServiceImpl implements SearchService {
                     Optional<Page> page = pageRepository.findById(s.getKey());
                     String content = page.get().getContent();
                     searchDto.setRelevance(s.getValue());
-                    List<String> snip = snippetParser.getSnippet(content, word);
-                    if (snip.size() != 0) searchDto.setSnippet(snip.get(0));
+                    String snip = snippet.getSnippet(content, word);
+                    if (snip != null) searchDto.setSnippet(snip);
                     searchDto.setUri(page.get().getPath());
                     searchDto.setTitle(getTitleOfPage(page.get().getContent()));
                     searchDto.setSite(page.get().getSite().getUrl());
@@ -134,11 +134,11 @@ public class SearchServiceImpl implements SearchService {
 
 
     // todo Получаем список страниц соответствующей последней(редкой) лемме
-    public List<Integer> getListLemmasRequest(List<Integer> lemmas) {
+    private List<Integer> getListLemmasRequest(List<Integer> lemmas) {
 
         List<Integer> idOneOfPage = new ArrayList<>();
         int lemmaOne = 0;
-        if (lemmas.size() != 0) lemmaOne = lemmas.get(0);
+        if (!lemmas.isEmpty()) lemmaOne = lemmas.get(0);
         Lemma lemma = lemmaRepository.getReferenceById(lemmaOne);
         List<Index> index = indexRepository.getIndexByLemma(lemma);
         index.forEach(i -> idOneOfPage.add(i.getPage().getId()));
@@ -148,22 +148,24 @@ public class SearchServiceImpl implements SearchService {
 
 
     // todo Фильтруем спимок страниц, ислючая страницы где не содержаться  все леммы согласно запросу
-    public HashMap<Integer, Float> getFilteredPage(List<Integer> lemmasInBase, String word) {
+    private HashMap<Integer, Float> getFilteredPage(List<Integer> lemmasInBase, String word) {
 
         List<Integer> pagesForOneLemma = getListLemmasRequest(lemmasInBase);
         HashMap<String, Integer> store = morphology.getLemmaList(word);
 
-        if (lemmasInBase == null || lemmasInBase.size() != store.size()) return null;
+        if (lemmasInBase.isEmpty() || lemmasInBase.size() != store.size()) return null;
 
         HashMap<Integer, Float> pageRanks = new HashMap<>();
-        lemmasInBase.forEach(l -> {
-            pagesForOneLemma.forEach(p -> {
-                if (pageRanks.containsKey(p) && isOnIndex(p, l) != 0)
-                    pageRanks.put(p, pageRanks.get(p) + isOnIndex(p, l)); //рассчитываем абсолютную релевантность и
-                if (!pageRanks.containsKey(p) && isOnIndex(p, l) != 0)// сохраняем в значении l
-                    pageRanks.put(p, isOnIndex(p, l));
-                if (pageRanks.containsKey(p) && isOnIndex(p, l) == 0) pageRanks.remove(p);
-            });
+        pagesForOneLemma.forEach(p -> {
+            for (Integer l : lemmasInBase){
+                if (isOnIndex(p, l) == 0) {
+                    if (pageRanks.containsKey(p)) pageRanks.remove(p);
+                    break;
+                }
+                else if (pageRanks.containsKey(p)) pageRanks.put(p, pageRanks.get(p) + isOnIndex(p, l));
+                else pageRanks.put(p, isOnIndex(p, l));
+            }
+
         });
 
         if (pageRanks.size() == 0) return null;
@@ -176,7 +178,8 @@ public class SearchServiceImpl implements SearchService {
     }
 
 
-    public float isOnIndex(int page, int lemma) {
+
+    private float isOnIndex(int page, int lemma) {
         Lemma word = lemmaRepository.findLemmaById(lemma);
         Page page1 = pageRepository.findById(page);
         Index index = indexRepository.getIndexByLemmaAndPage(word, page1);
@@ -185,7 +188,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
 
-    public String getTitleOfPage(String text) {
+    private String getTitleOfPage(String text) {
         String regex = "<title>[\\W\\w\\s]+</title>";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
@@ -200,7 +203,7 @@ public class SearchServiceImpl implements SearchService {
 
     }
 
-    public List<SearchDto> trimListObject(List<SearchDto> list, int offset, int limit) {
+    private List<SearchDto> trimListObject(List<SearchDto> list, int offset, int limit) {
         int count = list.size();
         int last = count - offset;
         if (last > 0) {

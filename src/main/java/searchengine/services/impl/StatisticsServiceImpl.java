@@ -66,27 +66,22 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     public int getVolumePages(String url){
         searchengine.model.Site site = siteRepository.findByUrl(url);
-        int count = 0;
+        List<Page> pages;
         if (site != null) {
-            List<Page> pages = pageRepository.findAll();
-
-            for (Page p : pages) {
-                if (p.getSite().getId() == site.getId()) count++;
-            }
+            pages = pageRepository.findBySite(site);
+            return pages.size();
         }
-        return count;
+        return 0;
     }
 
     public int getVolumeLemmas( String url){
         searchengine.model.Site site = siteRepository.findByUrl(url);
-        List<Lemma> lemmas = lemmaRepository.findAll();
-       int count = 0;
+        List<Lemma> lemmas;
         if (site != null) {
-            for (Lemma l : lemmas) {
-                if (l.getSite().getId() == site.getId()) count++;
-            }
+           lemmas = lemmaRepository.findLemmasBySite(site);
+           return lemmas.size();
         }
-        return count;
+        return 0;
     }
 
     public StatusType getStatusSite(String url){

@@ -33,7 +33,7 @@ public class PageUrlFound extends RecursiveTask<List<PageDto>> {
     @Override
     protected List<PageDto> compute() {
         try {
-            Thread.sleep(200);
+            Thread.sleep(150);
             Document doc = getConnect(url);
             String html = doc.html();
             int status = doc.connection().response().statusCode();

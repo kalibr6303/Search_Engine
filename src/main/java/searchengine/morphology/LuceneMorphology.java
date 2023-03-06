@@ -1,6 +1,5 @@
 package searchengine.morphology;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
@@ -9,9 +8,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-@Slf4j
+
 @Component
-public class LuceneMorphology implements Morphology{
+public class LuceneMorphology implements Morphology {
 
 
     private static  org.apache.lucene.morphology.LuceneMorphology luceneMorphology;
@@ -24,10 +23,9 @@ public class LuceneMorphology implements Morphology{
         }
     }
 
-    public LuceneMorphology()  {
-    }
 
-    public Boolean isContainsServicePartSpeech(String word) throws IOException {
+
+    private Boolean isContainsServicePartSpeech(String word) throws IOException {
         String word1 = word.trim();
         if (!word1.matches("[а-яА-Я]+") || word1.matches("[а-яА-Я]")) return true;
         List<String> wordBaseForms = luceneMorphology.getMorphInfo(word1);
@@ -39,7 +37,7 @@ public class LuceneMorphology implements Morphology{
     }
 
 
-    public static List<String> getLinkString(String word) {
+    private List<String> getLinkString(String word) {
 
         String wordResult = word.replaceAll("[^а-яА-Я\\s]+", " ");
         String wordResultNext = wordResult.toLowerCase();
@@ -49,13 +47,14 @@ public class LuceneMorphology implements Morphology{
         return linkString;
     }
 
-    public static List<String> getLinkStringForSearch(String word) {
+    private   List<String> getLinkStringForSearch(String word) {
 
         String wordResult = word.replaceAll("[^а-яА-Я\\s]+", " ");
 
         List<String> linkString;
         String[] list = wordResult.split("\\s+");
         linkString = Arrays.asList(list);
+
         return linkString;
     }
 
@@ -83,21 +82,20 @@ public class LuceneMorphology implements Morphology{
     public List<String> getLemmasByQuery(String word) {
         List<String> storage = new ArrayList<>();
         HashMap<String, String> storageString = getLemmasByTeg(word);
-        storageString.entrySet().forEach(s -> storage.add(s.getKey()));
+        storageString.entrySet().forEach(s -> storage.add(s.getValue()));
         return storage;
     }
 
     public HashMap<String, String> getLemmasByTeg(String word) {
         HashMap<String, String> storageString = new HashMap<>();
-        List<String> lemmaByTeg = getLinkStringForSearch(word);;
+        List<String> lemmaByTeg = getLinkStringForSearch(word);
         lemmaByTeg.forEach(s -> {
             try {
                 String wordResultNext = s.toLowerCase();
                 if (!isContainsServicePartSpeech(wordResultNext) && wordResultNext.matches("[а-я]+")) {
-
                     List<String> forms = luceneMorphology.getNormalForms(wordResultNext);
                     forms.forEach(d -> {
-                            storageString.put(d, s);
+                            storageString.put(s, d);
                     });
                 }
             } catch (IOException e) {

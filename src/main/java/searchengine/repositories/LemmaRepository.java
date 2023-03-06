@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import searchengine.model.Lemma;
 import searchengine.model.Site;
 
+import java.util.List;
+
 
 @Repository
 public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
@@ -25,5 +27,6 @@ public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
 
     Lemma findLemmaByLemmaAndSite(String lemma, Site site);
 
+    List<Lemma> findLemmasBySite(Site site);
 
 }

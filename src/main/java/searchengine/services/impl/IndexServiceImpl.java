@@ -1,8 +1,6 @@
 package searchengine.services.impl;
 
-
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import searchengine.config.Site;
@@ -22,7 +20,6 @@ import java.util.concurrent.Executors;
 @Service
 @Component
 @RequiredArgsConstructor
-@Slf4j
 
 public class IndexServiceImpl implements IndexService {
 
@@ -87,12 +84,11 @@ public class IndexServiceImpl implements IndexService {
         if (isIndexingActive()) {
             executorService.shutdownNow();
             indexingResponse.setResult(true);
-            return indexingResponse;
         } else {
             indexingResponse.setResult(false);
             indexingResponse.setError("Индексация не запущена");
-            return indexingResponse;
         }
+        return indexingResponse;
     }
 
     private String containSiteOfBaseByLink(String link) {

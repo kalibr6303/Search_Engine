@@ -1,6 +1,5 @@
 package searchengine.sql;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import searchengine.model.Page;
@@ -23,7 +22,7 @@ public class LemmaWriter implements Lemma{
 
 
 
-    public  int addOfBaseLemma(Site site, String lemma) throws SQLException, IOException, InterruptedException {
+    private int addOfBaseLemma(Site site, String lemma) throws SQLException, IOException, InterruptedException {
 
             String siteId = String.valueOf(site.getId());
             lemmaRepository.insertLemma(lemma, siteId);
@@ -33,7 +32,7 @@ public class LemmaWriter implements Lemma{
 
 
     @Transactional
-    public   void writeLemmaToBase(String content, Site site, Page page) throws  InterruptedException {
+    public synchronized   void writeLemmaToBase(String content, Site site, Page page) throws  InterruptedException {
         if (!Thread.interrupted()) {
             HashMap<String, Integer> storage = morphology.getLemmaList(content);
             if (storage.size() != 0) {

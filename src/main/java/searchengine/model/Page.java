@@ -8,7 +8,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 import javax.persistence.Index;
 
-
 @Getter
 @Setter
 @Entity
