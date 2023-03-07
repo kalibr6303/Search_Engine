@@ -1,13 +1,13 @@
 package searchengine.developer;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.var;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import searchengine.dto.PageDto;
-
+import searchengine.util.UserAgent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
@@ -20,14 +20,26 @@ public class PageUrlFound extends RecursiveTask<List<PageDto>> {
     private String url;
     private List<String> urlList;
     private List<PageDto> pageDtoList;
+    private static String agent;
+    private static String referrer;
 
-    public PageUrlFound(String url, List<PageDto> pageDtoList, List<String> urlList) {
+    static {
+        try {
+            agent = UserAgent.getAgent();
+            referrer = UserAgent.getReferrer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public PageUrlFound(String url, List<PageDto> pageDtoList, List<String> urlList)  {
         this.url = url;
         this.pageDtoList = pageDtoList;
         this.urlList = urlList;
     }
 
-    public PageUrlFound() {
+    public PageUrlFound()  {
     }
 
     @Override
@@ -84,11 +96,8 @@ public class PageUrlFound extends RecursiveTask<List<PageDto>> {
         Document doc = null;
         try {
             Thread.sleep(150);
+            doc = Jsoup.connect(url).userAgent(agent).referrer(referrer).get();
 
-            doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:49.0) Gecko/20100101 Firefox/49.0")
-                    .referrer("http://www.google.com")
-                    .get();
         } catch (Exception e) {
             log.debug("Не удалось установить подключение с " + url);
         }

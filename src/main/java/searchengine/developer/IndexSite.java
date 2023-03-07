@@ -46,7 +46,6 @@ public class IndexSite implements Runnable {
         try {
             List<PageDto> pageDtoList = getPageDtoList();
             saveToBase(pageDtoList, site);
-            System.out.println(site.getLastError());
             site.setStatus(StatusType.INDEXED);
             site.setStatusTime(new Date());
             siteRepository.save(site);
