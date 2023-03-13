@@ -1,7 +1,5 @@
 package searchengine.util;
 
-
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,7 +35,6 @@ public class UserAgent {
             if (line.matches("\\s-\\sreferrer:\\s[\\W\\w]+")) {
                 String line2 = line.replaceAll("\\s-\\sreferrer:\\s", "");
                 referrer = line2;
-
             }
         }
         scanner.close();
@@ -45,9 +42,10 @@ public class UserAgent {
         return agents;
     }
 
+
     public static String getAgent() throws IOException {
         List<String> userAgentsList = readUsingScanner();
-        int s = (int) (Math.random() * userAgentsList.size());
+        int s = (int) (Math.random() * userAgentsList.size() - 1);
         return userAgentsList.get(s);
 
     }

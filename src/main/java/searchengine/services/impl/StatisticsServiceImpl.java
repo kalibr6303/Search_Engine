@@ -64,7 +64,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return response;
     }
 
-    public int getVolumePages(String url){
+    private int getVolumePages(String url){
         searchengine.model.Site site = siteRepository.findByUrl(url);
         List<Page> pages;
         if (site != null) {
@@ -74,7 +74,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return 0;
     }
 
-    public int getVolumeLemmas( String url){
+    private int getVolumeLemmas( String url){
         searchengine.model.Site site = siteRepository.findByUrl(url);
         List<Lemma> lemmas;
         if (site != null) {
@@ -84,19 +84,19 @@ public class StatisticsServiceImpl implements StatisticsService {
         return 0;
     }
 
-    public StatusType getStatusSite(String url){
+    private StatusType getStatusSite(String url){
         searchengine.model.Site site = siteRepository.findByUrl(url);
         if (site != null) return site.getStatus();
         return null;
     }
 
-    public String getStatusTime(String url) {
+    private String getStatusTime(String url) {
         searchengine.model.Site site = siteRepository.findByUrl(url);
         if (site != null) return String.valueOf(site.getStatusTime());
         return null;
     }
 
-    public String getError(String url) {
+    private String getError(String url) {
         searchengine.model.Site site = siteRepository.findByUrl(url);
         if (site != null)  return String.valueOf(site.getLastError());
        return null;

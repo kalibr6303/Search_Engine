@@ -92,7 +92,7 @@ public class PageUrlFound extends RecursiveTask<List<PageDto>> {
     }
 
 
-    public Document getConnect(String url) {
+    private Document getConnect(String url) {
         Document doc = null;
         try {
             Thread.sleep(150);

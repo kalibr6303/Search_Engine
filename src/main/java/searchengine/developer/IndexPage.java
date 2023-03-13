@@ -41,7 +41,5 @@ public class IndexPage implements Runnable {
             IndexSite indexSite = new IndexSite(siteRepository, pageRepository, url, sitesList, lemma);
             indexSite.saveToBase(pageDtoList, site);
         }
-
     }
-
 }

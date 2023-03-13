@@ -16,6 +16,7 @@ import searchengine.repositories.LemmaRepository;
 import searchengine.repositories.PageRepository;
 import searchengine.repositories.SiteRepository;
 import searchengine.services.SearchService;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -35,7 +36,7 @@ public class SearchServiceImpl implements SearchService {
     private final SitesList sitesList;
 
 
-    public SearchResponse allSiteSearch(String word, int offset, int limit) {
+    public SearchResponse allSiteSearch(String word, int offset, int limit) throws IOException {
         SearchResponse searchResponse = new SearchResponse();
         if (word.isEmpty() || !word.matches("[а-яА-Я\\s]+")) {
             searchResponse.setResult(false);
@@ -55,6 +56,8 @@ public class SearchServiceImpl implements SearchService {
         searchResponse.setResult(true);
         searchResponse.setData(allSearchDto);
         searchResponse.setCount(allSearchDto.size());
+
+
         return searchResponse;
     }
 
@@ -119,14 +122,16 @@ public class SearchServiceImpl implements SearchService {
                     SearchDto searchDto = new SearchDto();
                     Optional<Page> page = pageRepository.findById(s.getKey());
                     String content = page.get().getContent();
-                    searchDto.setRelevance(s.getValue());
-                    String snip = snippet.getSnippet(content, word);
-                    if (snip != null) searchDto.setSnippet(snip);
-                    searchDto.setUri(page.get().getPath());
-                    searchDto.setTitle(getTitleOfPage(page.get().getContent()));
-                    searchDto.setSite(page.get().getSite().getUrl());
-                    searchDto.setSiteName(page.get().getSite().getName());
-                    listOfSearchDto.add(searchDto);
+                    if (snippet.getSnippet(content, word) != null) {
+                        searchDto.setRelevance(s.getValue());
+                        String snip = snippet.getSnippet(content, word);
+                        if (snip != null) searchDto.setSnippet(snip);
+                        searchDto.setUri(page.get().getPath());
+                        searchDto.setTitle(getTitleOfPage(page.get().getContent()));
+                        searchDto.setSite(page.get().getSite().getUrl());
+                        searchDto.setSiteName(page.get().getSite().getName());
+                        listOfSearchDto.add(searchDto);
+                    }
                 });
 
         return trimListObject(listOfSearchDto, offset, limit);
@@ -167,6 +172,7 @@ public class SearchServiceImpl implements SearchService {
             }
 
         });
+
 
         if (pageRanks.size() == 0) return null;
         Float maxEntry = pageRanks.entrySet() // рассчитываем абсолютную и относительную релевантность
